@@ -21,7 +21,7 @@ def sumar():
         num_sumar = float(input(f"Digite un número a agregar: "))
     except ValueError as error:
         print(f"El numero digitado no es un número")
-    num_ini =+ num_sumar
+    num_ini = num_ini + num_sumar
     return num_ini
 
 
@@ -32,7 +32,7 @@ def restar():
         num_restar = float(input(f"Digite un número a restar: "))
     except ValueError as error:
         print(f"El numero digitado no es un número")
-    num_ini =- num_restar
+    num_ini = num_ini - num_restar
     return num_ini
 
 
