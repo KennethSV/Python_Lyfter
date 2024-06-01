@@ -4,15 +4,19 @@
     1. Siga el siguiente formato:
 '''
 
+location = "canciones"
+new_location = "canciones_ordenado.txt"
+
 def ordenar_archivo(path):
-    with open(path, "r") as file1:
-        ini_lines = file1.readlines()
+    with open(path, "r") as file:
+        ini_lines = file.readlines()
         sorted_list = sorted(ini_lines)
-        return sorted_list
+        string_songs = ''.join([str(song) for song in sorted_list])
+        return string_songs
 
+def generar_archivo_ordenado():
+    with open("canciones_ordenado.txt", 'x') as file:
+        file.write(ordenar_archivo(location))
+        
 
-def crear_archivo_ordenado():
-    print(ordenar_archivo("canciones"))
-
-
-crear_archivo_ordenado()
+generar_archivo_ordenado()
