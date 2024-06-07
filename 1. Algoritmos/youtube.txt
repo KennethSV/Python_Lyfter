@@ -1,0 +1,24 @@
+# Cree un algoritmo para ver un video en Youtube. Sea lo más especifico posible
+
+1. Inicio
+	2. Si, tiene dispositivo movil y el dispositivo está cargado
+		2.1 Desbloquear el dispositivo movil
+		2.2 Buscar la aplicación de Youtube
+		2.3 Abrir la aplicación de Youtube
+		2.4 Colocar en el buscador el texto del video deseado
+		2.5 Encontrar video
+		2.6 Dar click en video deseado
+		2.7 Ver video
+	3. Si, tiene dispositivo movil y el dispositivo está descargado
+		3.1 Poner a cargar dispositivo
+	4. Si, tiene computadora y la computadora está conectada a la corriente
+		4.1 Desbloquear computadora
+		4.2 Abrir navegador web
+		4.3 Ir hacia la página www.youtube.com
+		4.4 Colocar en el buscador el texto del video deseado
+		4.5 Encontrar video
+		4.6 Dar click en video deseado
+		4.7 Ver video
+	5. Si, tiene computadora y la computadora no está conectada a la corriente
+	5.1 Conectar a la corriente
+6. Fin

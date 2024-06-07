@@ -1,0 +1,41 @@
+Adjunto el entregable de semana 2, quedo atento a cualquier feedback.
+
+1. Dado un precio de un producto, calcular el descuento y mostrar el precio final tomando en cuenta que:
+1. Si el precio es menor a 100, el descuento es del 2%.
+2. Si el precio es mayor o igual a 100, el descuento es del 10%.
+3. Ejemplos:
+1. 120 → 108
+2. 40 → 39.2
+
+Inicio
+Definir precio_ini = 0
+Definir descuento = 0
+Definir precio_fin = 0
+Mostrar "Digite el precio del producto"
+Pedir precio_ini
+Si: (precio_ini >= 100) entonces:
+precio_fin = precio_ini * 0.9
+Sino:
+precio_fin = precio_ini * 0.98
+FinSi
+Mostrar "El precio del producto con descuento es de: $precio_fin"
+Fin
+
+2. Dado un tiempo en segundos, calcule si es menor o mayor a 10 minutos.
+1. Si es menor, muestre cuantos segundos faltarían para llegar a 10 minutos.
+2. Ejemplos:
+1. 1040 → Mayor
+2. 140 → 160
+
+Inicio
+Definir tiempo = 0
+Definir pend = 0
+Mostrar "Cual es el tiempo en segundos?"
+Pedir tiempo
+Si: (tiempo > 600) entonces:
+Mostrar "Mayor"
+Sino:
+pend = 600 - tiempo
+Mostrar "El tiempo en segundos que hace falta para los 10 minutos es de $pend"
+FinSi
+Fin
