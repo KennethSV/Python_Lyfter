@@ -95,21 +95,28 @@ def calcular_promedios():
 
 
 def calcular_top3():
-    top1 = 0
-    top2 = 0
-    top3 = 0
+    top1 = {'Promedio': 0}
+    top2 = {'Promedio': 0}
+    top3 = {'Promedio': 0}
     global lista_promedios
     global lista_top3
-    for estudiante, dict in enumerate(lista_promedios):
-        for key, value in dict.items():
-            if key == 'Promedio':
-                if value > top1:
-                    top1 = value
-                elif value > top2:
-                    top2 = value
-                elif value > top3:
-                    top3 = value
+    for estudiante in lista_promedios:
+        promedio = estudiante.get('Promedio')
+        if promedio > top1['Promedio']:
+            top3 = top2
+            top2 = top1
+            top1 = estudiante
+        elif promedio > top2['Promedio']:
+            top3 = top2
+            top2 = estudiante
+        elif promedio > top3['Promedio']:
+            top3 = estudiante
+    lista_top3 = [top1]
+    if top2['Promedio'] > 0:
+         lista_top3.append(top2)
+    if top3['Promedio'] > 0:
+         lista_top3.append(top3)
 
 
 if __name__ == '__main__':
-	ingresar_estudiante(), calcular_promedios()
+	ingresar_estudiante(), calcular_promedios(), calcular_top3()

@@ -13,15 +13,25 @@ def desplegar_menu():
     if menu == 1:
         manejo_informacion.ingresar_estudiante()
         manejo_informacion.calcular_promedios()
+        manejo_informacion.calcular_top3()
         desplegar_menu()
     elif menu == 2:
-        pprint.pprint(manejo_informacion.lista_estudiantes)
+        if not manejo_informacion.lista_estudiantes:
+            print("Actualmente la tabla de estudiantes está vacía, favor ingresar datos")
+        else:
+            pprint.pprint(manejo_informacion.lista_estudiantes)            
         desplegar_menu()
     elif menu == 3:
-        
+        if not manejo_informacion.lista_top3:
+            print("Actualmente la tabla de estudiantes está vacía, favor ingresar datos")
+        else:
+            pprint.pprint(manejo_informacion.lista_top3)
         desplegar_menu()
     elif menu == 4:
-        pprint.pprint(manejo_informacion.lista_promedios)
+        if not manejo_informacion.lista_promedios:
+            print("Actualmente la tabla de estudiantes está vacía, favor ingresar datos")
+        else:
+            pprint.pprint(manejo_informacion.lista_promedios)            
         desplegar_menu()
     elif menu == 5:
         
