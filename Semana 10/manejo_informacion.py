@@ -15,7 +15,7 @@ def ingresar_estudiante():
     nombre = input("Ingrese el nombre del estudiante: ")
     while seccion_flag:
         try:
-            seccion = input("Ingrese la seccion del estudiante: ")
+            seccion = input("Ingrese la seccion del estudiante (Formato: 2 numeros y una letra, ej: 12B)\n >> ")
             if re.fullmatch(seccion_pat, seccion) == None:
                 raise ValueError("Seccion no Existe")
             else: 
