@@ -4,20 +4,37 @@
 '''
 
 import csv
+import manejo_informacion
 
-def escribir_archivo_csv(file_path, data, headers):
-  with open(file_path, 'w', encoding='utf-8') as file:
+def escribir_archivo_csv(file_path, estudiantes):
+  with open(file_path, 'w', encoding='utf-8', newline='') as file:
+    headers = ['Nombre completo', 'Sección', 'Nota de español', 'Nota de inglés', 'Nota de sociales', 'Nota de ciencias']
     writer = csv.DictWriter(file, headers)
     writer.writeheader()
-    writer.writerows(data)
+    for estudiante in estudiantes:
+        writer.writerow({
+            'Nombre completo': estudiante.nombre,
+            'Sección': estudiante.seccion,
+            'Nota de español': estudiante.espanol,
+            'Nota de inglés': estudiante.ingles,
+            'Nota de sociales': estudiante.sociales,
+            'Nota de ciencias': estudiante.ciencias,
+        })
 
 def importar_archivo_csv(file_path):
-    def try_convert(value):
-        try:
-            return int(value)
-        except ValueError:
-            return value 
-    with open(file_path, 'r', newline='', encoding='utf-8') as file:
-            archivo_importado = csv.DictReader(file)
-            contenido_archivo = [{key: try_convert(value) for key, value in row.items()} for row in archivo_importado]
-    return contenido_archivo
+    manejo_informacion.lista_estudiantes = []
+    
+    with open(file_path, mode='r', newline='') as file:
+        reader = csv.DictReader(file)
+        
+        for row in reader:
+            estudiante = manejo_informacion.Estudiante(
+                nombre=row['Nombre completo'],
+                seccion=row['Sección'],
+                espanol=int(row['Nota de español']),
+                ingles=int(row['Nota de inglés']),
+                sociales=int(row['Nota de sociales']),
+                ciencias=int(row['Nota de ciencias'])
+            )
+            manejo_informacion.lista_estudiantes.append(estudiante)
+    return manejo_informacion.lista_estudiantes
