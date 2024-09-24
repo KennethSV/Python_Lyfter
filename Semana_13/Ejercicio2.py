@@ -3,7 +3,7 @@ Cree un decorador que se encargue de revisar si todos los parámetros de la func
 que decore son números, y arroje una excepción de no ser así.
 '''
 
-def numchecker(func):
+def num_checker(func):
     def wrapper(*args):
         print(f"Los parametros de la funcion: ", func.__name__, "son los siguientes: ", args)
         try:
@@ -15,13 +15,13 @@ def numchecker(func):
     return wrapper
 
 
-@numchecker
+@num_checker
 def sumar(num1, num2):
     total = num1 + num2
     return total
 
 
-@numchecker
+@num_checker
 def multiplicar(num1, num2, num3):
     total = num1 * num2 * num3
     return total

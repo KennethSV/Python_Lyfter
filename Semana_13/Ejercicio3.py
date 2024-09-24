@@ -19,7 +19,7 @@ class User:
         self.age = age
 
 
-    def verifyLegalAge(func):
+    def verify_legal_age(func):
         def wrapper(self, *args):
             if self.age < 18:
                 raise ValueError("no es mayor de edad")
@@ -27,7 +27,7 @@ class User:
         return wrapper
     
     
-    @verifyLegalAge
+    @verify_legal_age
     def drinking(self):
         return "Si estás tomando es por que eres mayor de edad"
 
