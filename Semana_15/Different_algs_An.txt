@@ -2,10 +2,10 @@ Analice los siguientes algoritmos usando la Big O Notation:
 
 1. 
     ```
-    print_numbers_times_2 O(1)
-    def print_numbers_times_2(numbers_list): O(1)
-        for number in numbers_list: O(n)
-            print(number * 2) O(1)
+    print_numbers_times_2 --> O(1)
+    def print_numbers_times_2(numbers_list): --> O(1)
+        for number in numbers_list: --> O(n)
+            print(number * 2) --> O(n)
     ​```
 
     Ya que Big O notation se fija en el peor de los escenarios, este algoritmo se calificaría 
@@ -14,13 +14,13 @@ Analice los siguientes algoritmos usando la Big O Notation:
 2. 
     ```
     check_if_lists_have_an_equal
-    def check_if_lists_have_an_equal(list_a, list_b): O(1)
-        for element_a in list_a: O(n)
-            for element_b in list_b: O(n^2)
-                if element_a == element_b: O(1)
-                    return True O(1)
-                    
-        return False O(1)
+
+    def check_if_lists_have_an_equal(list_a, list_b): --> O(1)
+        for element_a in list_a: --> O(n)
+            for element_b in list_b: --> O(n^2)
+                if element_a == element_b: --> O(n^2)
+                    return True --> O(n^2)
+        return False --> O(1)
     ```​
 
     Ya que posee 2 ciclos anidados, en este caso un for dentro de otro for, este algoritmo
@@ -29,10 +29,11 @@ Analice los siguientes algoritmos usando la Big O Notation:
 3. 
     ```
     print_10_or_less_elements
-    def print_10_or_less_elements(list_to_print): O(1)
-        list_len = len(list_to_print) O(1)
-        for index in range(min(list_len, 10): O(n)
-            print(list_to_print[index] O(1)
+
+    def print_10_or_less_elements(list_to_print): --> O(1)
+        list_len = len(list_to_print) --> O(1)
+        for index in range(min(list_len, 10): --> O(n)
+            print(list_to_print[index] --> O(n)
     ​```
 
     Ya que posee 1 solo ciclo, este algoritmo se calificaría como O(n)
@@ -40,14 +41,14 @@ Analice los siguientes algoritmos usando la Big O Notation:
 4. 
     ```
     generate_list_trios
-    def generate_list_trios(list_a, list_b, list_c): O(1)
-        result_list = [] O(1)
-        for element_a in list_a: O(n)
-            for element_b in list_b: O(n^2)
-                for element_c in list_c: O(n^3)
-                    result_list.append(f'{element_a} {element_b} {element_c}')
-                    
-        return result_list 
+
+    def generate_list_trios(list_a, list_b, list_c): --> O(1)
+        result_list = [] --> O(1)
+        for element_a in list_a: --> O(n)
+            for element_b in list_b: --> O(n^2)
+                for element_c in list_c: --> O(n^3)
+                    result_list.append(f'{element_a} {element_b} {element_c}') --> O(n^3)
+        return result_list  --> O(1)
     ```
 
     Ya que posee 3 ciclos anidados, en este caso un for dentro de otro for dentro de otro for,
