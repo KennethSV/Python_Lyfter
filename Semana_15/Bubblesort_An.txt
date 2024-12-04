@@ -1,0 +1,18 @@
+```
+def bubble_sort(lista): --> O(1)
+    for y in range(0, len(lista)): --> O(n)
+        for x in range(0, len(lista)-1):  --> O(n^2)
+            elemento_actual = lista[x] --> O(n^2) * O(1) = O(n^2)
+            siguiente_elemento = lista[x+1] --> O(n^2) * O(1) = O(n^2)
+            if elemento_actual > siguiente_elemento: --> O(n^2) * O(1) = O(n^2)
+                lista[x] = siguiente_elemento --> O(n^2) * O(1) = O(n^2)
+                lista[x+1] = elemento_actual --> O(n^2) * O(1) = O(n^2)
+    return lista --> O(1)
+        
+lista = [10,90,30,5,85,70,41,23,98,56,25,0,54,25,87,98] --> O(1)
+print(bubble_sort(lista)) --> O(1)
+```
+
+Debido a que bubble_sort require de tener 2 ciclos for anidados, 
+para evaluar todos los datos de la lista, esto calificaría a bubble_sort, como
+O(n^2)
