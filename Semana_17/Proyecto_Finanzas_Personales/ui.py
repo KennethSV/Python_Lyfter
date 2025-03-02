@@ -39,9 +39,13 @@ agregada previamente, debe mostrar un error que diga
 '''
 
 import PySimpleGUI as sg
+import manejo_archivo_csv
 import csv
 
 ubicacion_archivo = 'finanzas.csv'
+headers = ["Categoria", "Gasto", "Ingreso"]
+
+manejo_archivo_csv.importar_archivo_csv(ubicacion_archivo)
 
 def mostrar_ventana_principal():
     layout = [
@@ -71,8 +75,6 @@ def mostrar_ventana_principal():
 
 def agregar_categoria():
 
-    categoria = ''
-
     layout = [
         [sg.Input(default_text='', key='Input')],
         [sg.Button("Aceptar Cambio")],
@@ -83,15 +85,20 @@ def agregar_categoria():
 
     while True:
         event, values = window.read()
-        if event == "Aceptar Cambio":
-            categoria = window['Input'].get()
-            print(categoria)
-            window.close()
-        if event == "Cerrar":
-            window.close()
-        elif event == sg.WIN_CLOSED:
+        
+        if event in ("Cerrar", sg.WIN_CLOSED):
             break
-    window.close()
+        
+        if event == "Aceptar Cambio":
+            categoria = values['Input'].strip()
+            
+            if categoria:  # Only add if it's not empty
+                new_data = [{"Categoria": categoria}]
+                manejo_archivo_csv.escribir_archivo_csv(ubicacion_archivo, new_data, headers)
+                sg.popup("Categoría agregada exitosamente.", title="Éxito")
+            window.close()
+            break
+        window.close()
 
 def agregar_gasto():
 
