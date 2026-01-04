@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "titulo": "Ciencias",
+        "descripcion": "Tarea de investigaci\u00f3n de levaduras",
+        "estado": "Por hacer"
+    },
+    {
+        "id": 2,
+        "titulo": "Sociales",
+        "descripcion": "Segunda Guerra Mundial",
+        "estado": "En progreso"
+    }
+]
