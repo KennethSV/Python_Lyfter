@@ -1,14 +1,20 @@
 [
     {
-        "id": 1,
-        "titulo": "Ciencias",
-        "descripcion": "Tarea de investigaci\u00f3n de levaduras",
-        "estado": "Por hacer"
+        "descripcion": "Pitagoras",
+        "estado": "En progreso",
+        "id": 2,
+        "titulo": "Matematica"
     },
     {
-        "id": 2,
-        "titulo": "Sociales",
-        "descripcion": "Segunda Guerra Mundial",
-        "estado": "En progreso"
+        "descripcion": "Biologia",
+        "estado": "En progreso",
+        "id": 5,
+        "titulo": "Ciencias"
+    },
+    {
+        "descripcion": "Fisica",
+        "estado": "En progreso",
+        "id": 6,
+        "titulo": "Ciencias"
     }
 ]

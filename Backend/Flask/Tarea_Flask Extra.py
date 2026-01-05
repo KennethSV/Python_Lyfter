@@ -35,6 +35,7 @@
 '''
 
 from flask import Flask, jsonify, request, Response, json
+from flask.views import MethodView
 import os
 
 app = Flask(__name__)
@@ -60,14 +61,11 @@ def guardar_datos(tareas):
     with open(tareas_path, "w") as f:
         json.dump(tareas, f, indent=4)
 
-@app.route("/tareas", methods=["GET", "POST"])
+class Tareas(MethodView):
 
-def manipular_tareas():
+    def get(self):
+        tareas = leer_datos()
 
-    tareas = leer_datos()
-    data = request.json
-
-    if request.method == "GET":         
         tareas_filtradas = tareas
         tareas_filtradas_por_estado = request.args.get("estado")
 
@@ -77,69 +75,68 @@ def manipular_tareas():
             )
         return {"data": tareas_filtradas}
 
-    if request.method == "POST": 
-        
+    def post(self):
+        tareas = leer_datos()
+        data = request.json
+
         try:
             for tarea in tareas:
                 if tarea["id"] == data["id"]:
-                    return jsonify({"message": "ID de tarea pre-existente, intentar con otro ID"}), 400
+                        return jsonify({"message": "ID de tarea pre-existente, intentar con otro ID"}), 400
 
             if "id" not in data:
-                raise ValueError("Tarea no incluye el identificador")
-            
+                    raise ValueError("Tarea no incluye el identificador")
+                
             if type(data["id"]) is not int:
-                raise ValueError("El ID debe ser un número entero (int)")
+                    raise ValueError("El ID debe ser un número entero (int)")
 
             if "titulo" not in data:
-                raise ValueError("Tarea no incluye titulo")
+                    raise ValueError("Tarea no incluye titulo")
 
             if "descripcion" not in data:
-                raise ValueError("Tarea no incluye descripcion")
+                    raise ValueError("Tarea no incluye descripcion")
 
             if "estado" not in data:
-                raise ValueError("Tarea no incluye estado")
+                    raise ValueError("Tarea no incluye estado")
 
             if data["estado"] not in estados_validos:
-                return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
-            
+                    return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
+                
             nueva_tarea = {
-                    "id": data["id"],
-                    "titulo": data["titulo"],
-                    "descripcion": data["descripcion"],
-                    "estado": data["estado"]
-                }
-            
+                "id": data["id"],
+                "titulo": data["titulo"],
+                "descripcion": data["descripcion"],
+                "estado": data["estado"]
+            }
+                
             tareas.append(nueva_tarea)
             guardar_datos(tareas)
 
             return jsonify(tareas), 201
-        
+            
         except ValueError as ex:
             return jsonify(message=str(ex)), 400
         except Exception as ex:
             return jsonify(message=str(ex)), 528
 
-@app.route("/tareas/<int:id>", methods=["PATCH", "DELETE"])
+    def patch(self, tarea_id):
+        
+        tareas = leer_datos()
+        data = request.json
 
-def editar_tarea(id):
-
-    tareas = leer_datos()
-    new_data = request.json
-
-    if request.method == "PATCH": 
         tarea_encontrada = False
 
         for tarea in tareas:
-            if tarea["id"] == id:
-                if "titulo" in new_data:
-                    tarea["titulo"] = new_data["titulo"]
-                if "descripcion" in new_data:
-                    tarea["descripcion"] = new_data["descripcion"]
-                if "estado" in new_data:
-                    if new_data["estado"] not in estados_validos:
+            if tarea["id"] == tarea_id:
+                if "titulo" in data:
+                    tarea["titulo"] = data["titulo"]
+                if "descripcion" in data:
+                    tarea["descripcion"] = data["descripcion"]
+                if "estado" in data:
+                    if data["estado"] not in estados_validos:
                         return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
                     else:
-                        tarea["estado"] = new_data["estado"]
+                        tarea["estado"] = data["estado"]
                 tarea_encontrada = True
                 break
 
@@ -150,8 +147,12 @@ def editar_tarea(id):
         else:
             return jsonify({"message": "Tarea no encontrada"}), 404
 
-    if request.method == "DELETE":
-        tareas_nuevas = [t for t in tareas if t["id"] != id]
+    def delete(self, tarea_id):
+
+        tareas = leer_datos()
+        data = request.json
+
+        tareas_nuevas = [t for t in tareas if t["id"] != tarea_id]
         
         if len(tareas) == len(tareas_nuevas):
             return jsonify({"message": "Tarea no encontrada"}), 404
@@ -163,5 +164,9 @@ if __name__ == "__main__":
     if not os.path.exists(tareas_path):
         with open(tareas_path, "w") as f:
             json.dump([], f)
+    tareas_view = Tareas.as_view('tareas_api')
+    
+    app.add_url_rule('/tareas', view_func=tareas_view, methods=['GET', 'POST'])
+    app.add_url_rule('/tareas/<int:tarea_id>', view_func=tareas_view, methods=['PATCH', 'DELETE'])
 
     app.run(host="localhost", port=8001, debug=True)
