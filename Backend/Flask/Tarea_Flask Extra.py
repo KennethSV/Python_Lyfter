@@ -34,7 +34,7 @@
 - *Tip:* Use el header: `Authorization: Bearer <token>`
 '''
 
-from flask import Flask, jsonify, request, Response, json
+from flask import Flask, jsonify, request, Response, json, current_app
 from flask.views import MethodView
 import datetime
 import os
@@ -46,9 +46,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'kgb'
 
 estados_validos = [
-    "Por hacer",
-    "En progreso",
-    "Completado"
+    "por hacer",
+    "en progreso",
+    "completado"
 ]
 
 user_pass = [
@@ -57,8 +57,12 @@ user_pass = [
     {"user": "Daniela", "pass":"Cisco123!"}
 ]
 
-tareas_path = "/Users/ksolorzanovalverde/Documents/GitHub/Python_Lyfter/Backend/Flask/tareas.json"
-tareas_token = "/Users/ksolorzanovalverde/Documents/GitHub/Python_Lyfter/Backend/Flask/token.json"
+#tareas_path = "/Users/ksolorzanovalverde/Documents/GitHub/Python_Lyfter/Backend/Flask/tareas.json"
+#tareas_token = "/Users/ksolorzanovalverde/Documents/GitHub/Python_Lyfter/Backend/Flask/token.json"
+
+project_dir = os.path.join(os.path.dirname(__file__))
+tareas_path = os.path.join(project_dir, "tareas.json")
+tareas_token = os.path.join(project_dir, "token.json")
 
 def leer_datos():
     if not os.path.exists(tareas_path):
@@ -92,6 +96,12 @@ def guardar_token(nuevo_token, user):
     with open(tareas_token, "w") as f:
         json.dump(diccionario_tokens, f, indent=4)
 
+def borrar_token_vencido(token_a_borrar):
+    tokens = leer_token()
+
+    if token_a_borrar in tokens:
+        tokens.pop(token_a_borrar)
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -109,6 +119,20 @@ def token_required(f):
         
         if token_recibido not in tokens_validos:
             return jsonify({"message": "Token inválido o no encontrado"}), 401
+
+        try:
+            data = jwt.decode(
+                token_recibido, 
+                current_app.config['SECRET_KEY'], 
+                algorithms=["HS256"]
+            )
+
+        except jwt.ExpiredSignatureError:
+            borrar_token_vencido(token_recibido) 
+            return jsonify({"message": "El token ha expirado. Por favor inicie sesión nuevamente."}), 401
+        
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Token inválido"}), 401
 
         return f(*args, **kwargs)
     return decorated
@@ -148,7 +172,7 @@ class Tareas(MethodView):
 
         if tareas_filtradas_por_estado:
             tareas_filtradas = list(
-                filter(lambda show: show["estado"] == tareas_filtradas_por_estado, tareas_filtradas)
+                filter(lambda show: show["estado"].lower() == tareas_filtradas_por_estado.lower(), tareas_filtradas)
             )
         return {"data": tareas_filtradas}
 
@@ -156,45 +180,47 @@ class Tareas(MethodView):
         tareas = leer_datos()
         data = request.json
 
-        try:
-            for tarea in tareas:
-                if tarea["id"] == data["id"]:
-                        return jsonify({"message": "ID de tarea pre-existente, intentar con otro ID"}), 400
+        id_existente = {tarea["id"] for tarea in tareas}
 
-            if "id" not in data:
-                    raise ValueError("Tarea no incluye el identificador")
-                
-            if type(data["id"]) is not int:
-                    raise ValueError("El ID debe ser un número entero (int)")
+        if "id" in data:
+            try:
+                if data["id"] in id_existente:
+                    return jsonify({"message": "ID de tarea pre-existente, intentar con otro ID"}), 400
+                    
+                if type(data["id"]) is not int:
+                    return jsonify({"message": f"El ID debe ser un número entero (int)"}), 400
 
-            if "titulo" not in data:
-                    raise ValueError("Tarea no incluye titulo")
+                if "titulo" not in data:
+                    return jsonify({"message": f"Tarea no incluye titulo"}), 400
 
-            if "descripcion" not in data:
-                    raise ValueError("Tarea no incluye descripcion")
+                if "descripcion" not in data:
+                    return jsonify({"message": f"Tarea no incluye descripcion"}), 400
 
-            if "estado" not in data:
-                    raise ValueError("Tarea no incluye estado")
+                if "estado" not in data:
+                    return jsonify({"message": f"Tarea no incluye estado"}), 400
 
-            if data["estado"] not in estados_validos:
-                    return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
-                
-            nueva_tarea = {
-                "id": data["id"],
-                "titulo": data["titulo"],
-                "descripcion": data["descripcion"],
-                "estado": data["estado"]
-            }
-                
-            tareas.append(nueva_tarea)
-            guardar_datos(tareas)
+                if data["estado"] not in estados_validos:
+                        return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
+                    
+                nueva_tarea = {
+                    "id": data["id"],
+                    "titulo": data["titulo"],
+                    "descripcion": data["descripcion"],
+                    "estado": data["estado"]
+                }
+                    
+                tareas.append(nueva_tarea)
+                guardar_datos(tareas)
 
-            return jsonify(tareas), 201
+                return jsonify(tareas), 201
             
-        except ValueError as ex:
-            return jsonify(message=str(ex)), 400
-        except Exception as ex:
-            return jsonify(message=str(ex)), 528
+            except ValueError as ex:
+                return jsonify(message=str(ex)), 400
+            except Exception as ex:
+                return jsonify(message=str(ex)), 500
+        
+        else:
+            return jsonify({"message": "ID de tarea no incluida"}), 400
 
     def patch(self, tarea_id):
         
