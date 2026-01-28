@@ -102,6 +102,9 @@ def borrar_token_vencido(token_a_borrar):
     if token_a_borrar in tokens:
         tokens.pop(token_a_borrar)
 
+        with open(tareas_token, "w") as f:
+                json.dump(tokens, f, indent=4)
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -161,7 +164,7 @@ class Login(MethodView):
 
 
 class Tareas(MethodView):
-
+    
     decorators = [token_required]
 
     def get(self):
@@ -174,7 +177,7 @@ class Tareas(MethodView):
             tareas_filtradas = list(
                 filter(lambda show: show["estado"].lower() == tareas_filtradas_por_estado.lower(), tareas_filtradas)
             )
-        return {"data": tareas_filtradas}
+        return jsonify({"data": tareas_filtradas}), 200
 
     def post(self):
         tareas = leer_datos()
@@ -222,8 +225,12 @@ class Tareas(MethodView):
         else:
             return jsonify({"message": "ID de tarea no incluida"}), 400
 
+class Tareas_id(MethodView):
+
+    decorators = [token_required]
+
     def patch(self, tarea_id):
-        
+       
         tareas = leer_datos()
         data = request.json
 
@@ -246,20 +253,19 @@ class Tareas(MethodView):
         if tarea_encontrada:
             guardar_datos(tareas)
             return jsonify(tarea), 200
-        
+            
         else:
             return jsonify({"message": "Tarea no encontrada"}), 404
 
     def delete(self, tarea_id):
 
         tareas = leer_datos()
-        data = request.json
 
         tareas_nuevas = [t for t in tareas if t["id"] != tarea_id]
-        
+            
         if len(tareas) == len(tareas_nuevas):
             return jsonify({"message": "Tarea no encontrada"}), 404
-        
+            
         guardar_datos(tareas_nuevas)
         return jsonify({"message": "Tarea eliminada exitosamente"}), 200
 
@@ -269,10 +275,11 @@ if __name__ == "__main__":
             json.dump([], f)
 
     tareas_view = Tareas.as_view('tareas_api')
+    tareas_id_view = Tareas_id.as_view('tareas_id_api')
     login_view = Login.as_view('login_api')
 
     app.add_url_rule('/login', view_func=login_view, methods=['POST'])
     app.add_url_rule('/tareas', view_func=tareas_view, methods=['GET', 'POST'])
-    app.add_url_rule('/tareas/<int:tarea_id>', view_func=tareas_view, methods=['PATCH', 'DELETE'])
+    app.add_url_rule('/tareas/<int:tarea_id>', view_func=tareas_id_view, methods=['PATCH', 'DELETE'])
 
     app.run(host="localhost", port=8001, debug=True)
