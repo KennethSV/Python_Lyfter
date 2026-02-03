@@ -63,105 +63,113 @@ def guardar_datos(tareas):
     with open(tareas_path, "w") as f:
         json.dump(tareas, f, indent=4)
 
-@app.route("/tareas", methods=["GET", "POST"])
+@app.route("/tareas", methods=["GET"])
 
-def manipular_tareas():
+def leer_tareas():
+
+    tareas = leer_datos()
+             
+    tareas_filtradas = tareas
+    tareas_filtradas_por_estado = request.args.get("estado")
+
+    if tareas_filtradas_por_estado:
+        tareas_filtradas = list(
+            filter(lambda show: show["estado"] == tareas_filtradas_por_estado, tareas_filtradas)
+        )
+    return jsonify({"data": tareas_filtradas}), 200
+
+@app.route("/tareas", methods=["POST"])
+
+def modificar_tareas():
 
     tareas = leer_datos()
     
-    if request.method == "GET":         
-        tareas_filtradas = tareas
-        tareas_filtradas_por_estado = request.args.get("estado")
+    data = request.json    
+    
+    id_existente = {tarea["id"] for tarea in tareas}
 
-        if tareas_filtradas_por_estado:
-            tareas_filtradas = list(
-                filter(lambda show: show["estado"] == tareas_filtradas_por_estado, tareas_filtradas)
-            )
-        return jsonify({"data": tareas_filtradas}), 200
+    if "id" in data:
+        try:
+            if data["id"] in id_existente:
+                return jsonify({"message": "ID de tarea pre-existente, intentar con otro ID"}), 400
+                
+            if type(data["id"]) is not int:
+                return jsonify({"message": f"El ID debe ser un número entero (int)"}), 400
 
-    if request.method == "POST": 
-        data = request.json    
+            if "titulo" not in data:
+                return jsonify({"message": f"Tarea no incluye titulo"}), 400
+
+            if "descripcion" not in data:
+                return jsonify({"message": f"Tarea no incluye descripcion"}), 400
+
+            if "estado" not in data:
+                return jsonify({"message": f"Tarea no incluye estado"}), 400
+
+            if data["estado"] not in estados_validos:
+                    return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
         
-        id_existente = {tarea["id"] for tarea in tareas}
-
-        if "id" in data:
-            try:
-                if data["id"] in id_existente:
-                    return jsonify({"message": "ID de tarea pre-existente, intentar con otro ID"}), 400
-                    
-                if type(data["id"]) is not int:
-                    return jsonify({"message": f"El ID debe ser un número entero (int)"}), 400
-
-                if "titulo" not in data:
-                    return jsonify({"message": f"Tarea no incluye titulo"}), 400
-
-                if "descripcion" not in data:
-                    return jsonify({"message": f"Tarea no incluye descripcion"}), 400
-
-                if "estado" not in data:
-                    return jsonify({"message": f"Tarea no incluye estado"}), 400
-
-                if data["estado"] not in estados_validos:
-                        return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
-            
-                nueva_tarea = {
-                        "id": data["id"],
-                        "titulo": data["titulo"],
-                        "descripcion": data["descripcion"],
-                        "estado": data["estado"]
-                }
-            
-                tareas.append(nueva_tarea)
-                guardar_datos(tareas)
-                return jsonify(tareas), 201
+            nueva_tarea = {
+                    "id": data["id"],
+                    "titulo": data["titulo"],
+                    "descripcion": data["descripcion"],
+                    "estado": data["estado"]
+            }
         
-            except ValueError as ex:
-                return jsonify(message=str(ex)), 400
-            except Exception as ex:
-                return jsonify(message=str(ex)), 500
-            
-        else:
-            return jsonify({"message": "ID de tarea no incluida"}), 400
+            tareas.append(nueva_tarea)
+            guardar_datos(tareas)
+            return jsonify(tareas), 201
+    
+        except ValueError as ex:
+            return jsonify(message=str(ex)), 400
+        except Exception as ex:
+            return jsonify(message=str(ex)), 500
+        
+    else:
+        return jsonify({"message": "ID de tarea no incluida"}), 400
 
-@app.route("/tareas/<int:id>", methods=["PATCH", "DELETE"])
+@app.route("/tareas/<int:id>", methods=["PATCH"])
 
 def editar_tarea(id):
 
     tareas = leer_datos()
 
-    if request.method == "PATCH": 
-        new_data = request.json
-        tarea_encontrada = False
+    new_data = request.json
+    tarea_encontrada = False
 
-        for tarea in tareas:
-            if tarea["id"] == id:
-                if "titulo" in new_data:
-                    tarea["titulo"] = new_data["titulo"]
-                if "descripcion" in new_data:
-                    tarea["descripcion"] = new_data["descripcion"]
-                if "estado" in new_data:
-                    if new_data["estado"] not in estados_validos:
-                        return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
-                    else:
-                        tarea["estado"] = new_data["estado"]
-                tarea_encontrada = True
-                break
+    for tarea in tareas:
+        if tarea["id"] == id:
+            if "titulo" in new_data:
+                tarea["titulo"] = new_data["titulo"]
+            if "descripcion" in new_data:
+                tarea["descripcion"] = new_data["descripcion"]
+            if "estado" in new_data:
+                if new_data["estado"] not in estados_validos:
+                    return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
+                else:
+                    tarea["estado"] = new_data["estado"]
+            tarea_encontrada = True
+            break
 
-        if tarea_encontrada:
-            guardar_datos(tareas)
-            return jsonify(tarea), 200
-        
-        else:
-            return jsonify({"message": "Tarea no encontrada"}), 404
+    if tarea_encontrada:
+        guardar_datos(tareas)
+        return jsonify(tarea), 200
+    
+    else:
+        return jsonify({"message": "Tarea no encontrada"}), 404
 
-    if request.method == "DELETE":
-        tareas_nuevas = [t for t in tareas if t["id"] != id]
+@app.route("/tareas/<int:id>", methods=["DELETE"])
+
+def eliminar_tarea(id):
+
+    tareas = leer_datos()
+    
+    tareas_nuevas = [t for t in tareas if t["id"] != id]
         
-        if len(tareas) == len(tareas_nuevas):
-            return jsonify({"message": "Tarea no encontrada"}), 404
+    if len(tareas) == len(tareas_nuevas):
+        return jsonify({"message": "Tarea no encontrada"}), 404
         
-        guardar_datos(tareas_nuevas)
-        return jsonify({"message": "Tarea eliminada exitosamente"}), 200
+    guardar_datos(tareas_nuevas)
+    return jsonify({"message": "Tarea eliminada exitosamente"}), 200
 
 if __name__ == "__main__":
     if not os.path.exists(tareas_path):
