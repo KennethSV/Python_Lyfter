@@ -1,0 +1,26 @@
+[
+    {
+        "descripcion": "Pitagoras",
+        "estado": "completado",
+        "id": 2,
+        "titulo": "Matematica"
+    },
+    {
+        "descripcion": "Biologia",
+        "estado": "por hacer",
+        "id": 5,
+        "titulo": "Ciencias"
+    },
+    {
+        "descripcion": "Fisica",
+        "estado": "completado",
+        "id": 6,
+        "titulo": "Ciencias"
+    },
+    {
+        "descripcion": "Pitagoras",
+        "estado": "en progreso",
+        "id": 3,
+        "titulo": "Matematica"
+    }
+]
