@@ -176,3 +176,81 @@ ORDER BY total_dinero DESC;
 # 7. Obtenga una sola factura por número de factura.
 
 SELECT * from factura_producto WHERE numero_factura_id = 2;
+
+# Modificar las tablas que contienen fechas para guardarlas en un tipo de dato especifico para fecha
+
+De acuerdo a mi investigación una forma facil de usar un timestamp exacto es guardar la fecha en la base de datos utilizando epoch, el cual es un standard muy utilizado. 
+
+1. UPDATE facturas SET fecha_compra = strftime('%s', '2026-03-10 10:30:56');
+2. UPDATE productos SET fecha_ingreso = strftime('%s', '2026-03-10 10:30:56');
+3. UPDATE resenas SET fecha_resena = strftime('%s', '2026-03-10 10:30:56');
+4. UPDATE usuarios SET fecha_registro = strftime('%s', '2026-03-10 10:30:56');
+
+1. **Crear categorías y ajustar productos**
+- Cree la tabla `categories` con: `id` (PK autoincrement), `name` (UNIQUE, NOT NULL), `description`
+
+CREATE TABLE categorias (
+    id INT PRIMARY KEY,
+    nombre_categoria TEXT UNIQUE NOT NULL,
+    descripcion_categoria TEXT
+);
+
+- Agregue a `products` la columna `category_id` (INTEGER, puede permitir NULL)
+
+ALTER TABLE productos ADD COLUMN categoria_id INT REFERENCES categorias(id);
+
+- Inserte al menos 3 filas en `categories`
+
+INSERT INTO categorias (id, nombre_categoria, descripcion_categoria) 
+    VALUES (1, 'Gaming', 'Articulos pensados para jugar en PC o consolas de videojuegos')
+    ;
+
+INSERT INTO categorias (id, nombre_categoria, descripcion_categoria) 
+    VALUES (2, 'Hogar', 'Articulos para el hogar')
+    ;
+
+INSERT INTO categorias (id, nombre_categoria, descripcion_categoria) 
+    VALUES (3, 'Oficina', 'Articulos para la oficina')
+    ;
+
+- Actualice algunos `products` asignándoles un `category_id`
+
+UPDATE productos SET categoria_id = 1 WHERE marca = 'Nintendo';
+UPDATE productos SET categoria_id = 2 WHERE marca = 'Apple, Inc';
+UPDATE productos SET categoria_id = 3 WHERE marca = 'Logitech';
+
+- Verifique con `SELECT * FROM products (muestre: id, product_name, price, quantity, category_id)
+
+SELECT 
+productos.id, 
+productos.nombre, 
+productos.precio, 
+productos.categoria_id,
+SUM(factura_producto.cantidad_comprada) AS cantidad
+FROM productos
+JOIN factura_producto ON productos.id = factura_producto.producto_id 
+GROUP BY 
+productos.id, 
+productos.nombre, 
+productos.precio, 
+productos.categoria_id;
+
+
+1. **Carga de productos y filtros básicos**
+- Inserte al menos **10** filas en `products` con `product_name`, `price`, `quantity`
+- Seleccione todos los productos
+- Seleccione productos con `price > 50000`
+- Seleccione productos cuyo `product_name` contenga la palabra “apple” usando `LIKE`
+- Liste los **5** productos más caros con `ORDER BY price DESC LIMIT 5`
+
+1. **Campos nuevos en facturas y actualización**
+- Agregue a `invoices` las columnas `phone` (TEXT, puede ser NULL) y `cashier_code` (TEXT, por defecto `'N/A'`)
+- Actualice varias facturas asignando valores a `phone` y `cashier_code`
+- Seleccione todas las facturas que tengan `phone` vacío o NULL
+- Seleccione una sola factura por `invoice_id`
+
+1. **Correcciones de datos en productos**
+- Establezca `quantity = 0` donde `price <= 0`
+- Aumente el `price` en **100** unidades para todos los productos cuando `quantity` sea menor a 10
+- Disminuya `quantity` en **1** para un `product_id` específico
+- Verifique con `SELECT * FROM products ORDER BY id ASC LIMIT 10`
