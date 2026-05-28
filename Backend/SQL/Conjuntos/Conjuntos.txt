@@ -44,20 +44,20 @@ CREATE TABLE rents (
     state VARCHAR,
 );
 
-INSERT INTO books (id, name, author)
+INSERT INTO books (id, name, authorid)
     VALUES(1, "Don Quijote", 1);
 
-INSERT INTO books (id, name, author)
+INSERT INTO books (id, name, authorid)
     VALUES(2, "La Divina Comedia", 2);
 
-INSERT INTO books (id, name, author)
+INSERT INTO books (id, name, authorid)
     VALUES(3, "Vagabond 1-3", 3);
 
-INSERT INTO books (id, name, author)
+INSERT INTO books (id, name, authorid)
     VALUES(4, "Dragon Ball 1", 4);
 
-INSERT INTO books (id, name, author)
-    VALUES(5, "The Book of the 5 Rings");
+INSERT INTO books (id, name, authorid)
+    VALUES(5, "The Book of the 5 Rings", NULL);
 
 INSERT INTO authors (id, name)
     VALUES(1, "Miguel de Cervantes");
@@ -115,25 +115,22 @@ Cree las tablas en una base de datos SQL y realice las siguientes operaciones. D
 
 Obtenga todos los libros y sus autores (en caso de tenerlos)
 
-SELECT books.name, author.name from books as books inner join author as author;
+SELECT books.name, author.name from books as books inner join authors as author;
+
+## Edit, tienes razón acá no estaba seleccionando The Book of the 5 Rings, lo correcto era usar LEFT o RIGHT join de acuerdo al orden de definición, aquí está mi ejemplo:
+
+SELECT books.name, authors.name
+    from books
+    LEFT join authors
+    ON books.authorid = authors.id;
 
 Obtenga todos los libros que no tienen autor
 
-    SELECT 
-        books.name AS book_name, 
-        authors.name AS author_name 
-    FROM 
-        books 
-    INNER JOIN 
-        authors 
-        ON books.id = authors.id;
-
-        Result:
-            book_name	author_name
-            Don Quijote	Miguel de Cervantes
-            La Divina Comedia	Dante Alighieri
-            Vagabond 1-3	Takehiko Inoue
-            Dragon Ball 1	Akira Toriyama
+SELECT books.name, authors.name
+    FROM books
+    LEFT join authors
+    ON books.authorid = authors.id
+    WHERE authors.id is null;
 
 Obtenga todos los autores que no tienen libros
 
