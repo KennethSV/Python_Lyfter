@@ -39,141 +39,124 @@ import os
 
 app = Flask(__name__)
 
-estados_validos = [
-    "Por hacer",
-    "En progreso",
-    "Completado"
+valid_statuses = [
+    "Pending",
+    "In Progress",
+    "Completed"
 ]
 
-# tareas_path = "/Users/ksolorzanovalverde/Documents/GitHub/Python_Lyfter/Backend/Flask/tareas.json"
-
 project_dir = os.path.join(os.path.dirname(__file__))
-tareas_path = os.path.join(project_dir, "tareas.json")
+tasks_path = os.path.join(project_dir, "tasks.json")
 
-def leer_datos():
-    if not os.path.exists(tareas_path):
+def read_data():
+    if not os.path.exists(tasks_path):
         return []
-    try:
-        with open(tareas_path, "r") as f:
-            return json.load(f)
-    except Exception:
-        return []
+    
+    with open(tasks_path, "r") as f:
+        return json.load(f)
 
-def guardar_datos(tareas):
-    with open(tareas_path, "w") as f:
-        json.dump(tareas, f, indent=4)
+def save_data(tasks):
+    with open(tasks_path, "w") as f:
+        json.dump(tasks, f, indent=4)
 
-@app.route("/tareas", methods=["GET"])
-
-def leer_tareas():
-
-    tareas = leer_datos()
+@app.route("/tasks", methods=["GET"])
+def get_tasks():
+    tasks = read_data()
              
-    tareas_filtradas = tareas
-    tareas_filtradas_por_estado = request.args.get("estado")
+    filtered_tasks = tasks
+    filtered_by_status = request.args.get("status")
 
-    if tareas_filtradas_por_estado:
-        tareas_filtradas = list(
-            filter(lambda show: show["estado"] == tareas_filtradas_por_estado, tareas_filtradas)
+    if filtered_by_status:
+        filtered_tasks = list(
+            filter(lambda task: task["status"].lower() == filtered_by_status.lower(), filtered_tasks)
         )
-    return jsonify({"data": tareas_filtradas}), 200
+    return jsonify({"data": filtered_tasks}), 200
 
-@app.route("/tareas", methods=["POST"])
-
-def modificar_tareas():
-
-    tareas = leer_datos()
+@app.route("/tasks", methods=["POST"])
+def create_task():
+    tasks = read_data()
     
     data = request.json    
     
-    id_existente = {tarea["id"] for tarea in tareas}
+    existing_ids = {task["id"] for task in tasks}
 
     if "id" in data:
-        try:
-            if data["id"] in id_existente:
-                return jsonify({"message": "ID de tarea pre-existente, intentar con otro ID"}), 400
+        if data["id"] in existing_ids:
+            return jsonify({"message": "Task ID already exists, try another ID"}), 400
                 
-            if type(data["id"]) is not int:
-                return jsonify({"message": f"El ID debe ser un número entero (int)"}), 400
+        if type(data["id"]) is not int:
+            return jsonify({"message": "The ID must be an integer (int)"}), 400
 
-            if "titulo" not in data:
-                return jsonify({"message": f"Tarea no incluye titulo"}), 400
+        if "title" not in data or str(data["title"]).strip() == "":
+            return jsonify({"message": "Task does not include a valid title"}), 400
 
-            if "descripcion" not in data:
-                return jsonify({"message": f"Tarea no incluye descripcion"}), 400
+        if "description" not in data or str(data["description"]).strip() == "":
+            return jsonify({"message": "Task does not include a valid description"}), 400
 
-            if "estado" not in data:
-                return jsonify({"message": f"Tarea no incluye estado"}), 400
+        if "status" not in data:
+            return jsonify({"message": "Task does not include status"}), 400
 
-            if data["estado"] not in estados_validos:
-                    return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
+        if data["status"] not in valid_statuses:
+            return jsonify({"message": f"Invalid status. Must be one of: {valid_statuses}"}), 400
         
-            nueva_tarea = {
-                    "id": data["id"],
-                    "titulo": data["titulo"],
-                    "descripcion": data["descripcion"],
-                    "estado": data["estado"]
-            }
+        new_task = {
+                "id": data["id"],
+                "title": data["title"],
+                "description": data["description"],
+                "status": data["status"]
+        }
         
-            tareas.append(nueva_tarea)
-            guardar_datos(tareas)
-            return jsonify(tareas), 201
-    
-        except ValueError as ex:
-            return jsonify(message=str(ex)), 400
-        except Exception as ex:
-            return jsonify(message=str(ex)), 500
+        tasks.append(new_task)
+        save_data(tasks)
+        
+        return jsonify(new_task), 201
         
     else:
-        return jsonify({"message": "ID de tarea no incluida"}), 400
+        return jsonify({"message": "Task ID not included"}), 400
 
-@app.route("/tareas/<int:id>", methods=["PATCH"])
-
-def editar_tarea(id):
-
-    tareas = leer_datos()
+@app.route("/tasks/<int:id>", methods=["PATCH"])
+def update_task(id):
+    tasks = read_data()
 
     new_data = request.json
-    tarea_encontrada = False
+    task_found = False
 
-    for tarea in tareas:
-        if tarea["id"] == id:
-            if "titulo" in new_data:
-                tarea["titulo"] = new_data["titulo"]
-            if "descripcion" in new_data:
-                tarea["descripcion"] = new_data["descripcion"]
-            if "estado" in new_data:
-                if new_data["estado"] not in estados_validos:
-                    return jsonify({"message": f"Estado invalido. Debe ser uno de: {estados_validos}"}), 400
+    for task in tasks:
+        if task["id"] == id:
+            if "title" in new_data:
+                task["title"] = new_data["title"]
+            if "description" in new_data:
+                task["description"] = new_data["description"]
+            if "status" in new_data:
+                if new_data["status"] not in valid_statuses:
+                    return jsonify({"message": f"Invalid status. Must be one of: {valid_statuses}"}), 400
                 else:
-                    tarea["estado"] = new_data["estado"]
-            tarea_encontrada = True
+                    task["status"] = new_data["status"]
+            task_found = True
             break
 
-    if tarea_encontrada:
-        guardar_datos(tareas)
-        return jsonify(tarea), 200
+    if task_found:
+        save_data(tasks)
+        return jsonify(task), 200
     
     else:
-        return jsonify({"message": "Tarea no encontrada"}), 404
+        return jsonify({"message": "Task not found"}), 404
 
-@app.route("/tareas/<int:id>", methods=["DELETE"])
-
-def eliminar_tarea(id):
-
-    tareas = leer_datos()
+@app.route("/tasks/<int:id>", methods=["DELETE"])
+def delete_task(id):
+    tasks = read_data()
     
-    tareas_nuevas = [t for t in tareas if t["id"] != id]
+    new_tasks = [t for t in tasks if t["id"] != id]
         
-    if len(tareas) == len(tareas_nuevas):
-        return jsonify({"message": "Tarea no encontrada"}), 404
+    if len(tasks) == len(new_tasks):
+        return jsonify({"message": "Task not found"}), 404
         
-    guardar_datos(tareas_nuevas)
-    return jsonify({"message": "Tarea eliminada exitosamente"}), 200
+    save_data(new_tasks)
+    return jsonify({"message": "Task deleted successfully"}), 200
 
 if __name__ == "__main__":
-    if not os.path.exists(tareas_path):
-        with open(tareas_path, "w") as f:
+    if not os.path.exists(tasks_path):
+        with open(tasks_path, "w") as f:
             json.dump([], f)
 
     app.run(host="localhost", port=8001, debug=True)
